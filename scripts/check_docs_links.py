@@ -49,7 +49,7 @@ def candidates_for(source: Path, raw_link: str) -> list[Path]:
     if public_target is not None:
         candidates.append(public_target)
     if target.suffix == "":
-        candidates.extend([target.with_suffix(".md"), target / "README.md", target / "index.md"])
+        candidates.extend([target.with_suffix(".md"), target / "index.md"])
     elif target.suffix == ".html":
         candidates.append(target.with_suffix(".md"))
 

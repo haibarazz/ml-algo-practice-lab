@@ -169,8 +169,13 @@ def copy_markdown_files() -> int:
             rel = path.relative_to(ROOT)
             dest = DOCS / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
-            dest.write_text(transform_markdown(path), encoding="utf-8")
+            transformed = transform_markdown(path)
+            dest.write_text(transformed, encoding="utf-8")
             count += 1
+
+            if path.name == "README.md":
+                dest.with_name("index.md").write_text(transformed, encoding="utf-8")
+                count += 1
 
     return count
 
