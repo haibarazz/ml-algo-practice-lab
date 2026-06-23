@@ -40,10 +40,14 @@ def candidates_for(source: Path, raw_link: str) -> list[Path]:
 
     if link.startswith("/"):
         target = DOCS / link.lstrip("/")
+        public_target = DOCS / "public" / link.lstrip("/")
     else:
         target = (source.parent / link).resolve()
+        public_target = None
 
     candidates = [target]
+    if public_target is not None:
+        candidates.append(public_target)
     if target.suffix == "":
         candidates.extend([target.with_suffix(".md"), target / "README.md", target / "index.md"])
     elif target.suffix == ".html":

@@ -1,44 +1,167 @@
-# ML Algorithm Practice Lab
+<p align="center">
+  <img src="docs/public/ml-algo-practice-lab-hero.png" alt="ML Algorithm Practice Lab banner" width="100%">
+</p>
 
-这是一个面向面试、算法原理复现、深度学习训练流程和开源项目拆解的个人学习项目。
+<h1 align="center">ML Algorithm Practice Lab</h1>
 
-项目借鉴 `llm-algo-leetcode` 的练习组织方式：每个主题拆成可阅读的原理说明、可手写的代码题、可运行的测试、以及答案解析。但本项目会额外强调两个能力：
+<p align="center">
+  A test-driven practice lab for ML/DL handwriting problems and open-source LLM project dissection.
+</p>
 
-- 不给提示的独立手撕能力
-- 从真实开源项目中抽取可练习模块的能力
+<p align="center">
+  <a href="https://haibarazz.github.io/ml-algo-practice-lab/">Documentation</a>
+  ·
+  <a href="ml_dl_handwriting/MODULE_INDEX.md">Module Index</a>
+  ·
+  <a href="projects/minimind/MODULE_INDEX.md">MiniMind Track</a>
+  ·
+  <a href="docs/contributing.md">Contributing</a>
+</p>
 
-## 学习主线
+<p align="center">
+  <img alt="Modules" src="https://img.shields.io/badge/modules-62-blue">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-62%20module%20tests-green">
+  <img alt="Docs" src="https://img.shields.io/badge/docs-VitePress-646CFF">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-lightgrey">
+</p>
 
-- `ml_dl_handwriting/`: 机器学习与深度学习手撕题，包括 KNN、KMeans、线性/逻辑回归、反向传播、MLP、注意力、优化器、SFT、DPO 等。第一阶段暂不做 CV 和推荐算法。
-- `projects/minimind/`: 对 MiniMind 开源 LLM 项目的模块化拆解，包括数据、模型、训练、推理、对齐、评估和系统架构。
+## Overview
 
-未来新增开源项目时放在 `projects/` 下，例如 `projects/nanogpt/`，避免不同项目的源码映射和练习模块混在一起。
+ML Algorithm Practice Lab is an open-source learning repository for turning ML and LLM engineering concepts into small, runnable, reviewable exercises.
 
-第一阶段手撕模块总索引：
+The project is inspired by [datawhalechina/llm-algo-leetcode](https://github.com/datawhalechina/llm-algo-leetcode), and extends that style in two directions:
 
-- `ml_dl_handwriting/MODULE_INDEX.md`
+- **Independent handwriting practice**: every module contains both guided and unguided exercise sections.
+- **Open-source project dissection**: selected real LLM projects are decomposed into testable learning modules instead of only being summarized as reading notes.
 
-## 每个练习模块的结构
+The goal is simple: move from "I understand the idea" to "I can implement, test, explain, and debug the core mechanism".
 
-每个模块默认在同一个 Notebook / Markdown 中包含两种练习区：
+## What Is Included
 
-- `带提示练习区`: 提供 TODO 分解、关键公式和实现台阶。
-- `无提示练习区`: 只给目标、函数签名、输入输出和测试。
-- `solution.md`: 参考答案与解析。
-- `tests.py`: 可运行验证。
-- `notes.md`: 易错点、公式推导、面试追问。
+| Track | Scope | Entry |
+| --- | --- | --- |
+| ML/DL Handwriting | Math primitives, classical ML, deep learning basics, Attention/Transformer, LLM training and alignment | [ml_dl_handwriting](ml_dl_handwriting/MODULE_INDEX.md) |
+| MiniMind Dissection | Data processing, model architecture, pretraining, SFT, preference alignment, inference, evaluation, system architecture | [projects/minimind](projects/minimind/MODULE_INDEX.md) |
+| Documentation Site | VitePress site with generated module pages, sidebar navigation, Colab links, and folded answer sections | [Online docs](https://haibarazz.github.io/ml-algo-practice-lab/) |
 
-Notebook 是主要练习界面，Markdown 是阅读和发布界面。带提示区、无提示区和答案区放在同一个学习页面内。
+## Design Principles
 
-默认页面顺序：
+- **Test-driven learning**: each module has a local `tests.py` that can be run directly.
+- **No hidden judge dependency**: examples and assertions are visible so the learner can inspect the expected behavior.
+- **Guided first, blank second**: the same concept is practiced with hints first, then without hints.
+- **Source-aware dissection**: project modules keep explicit links back to the real implementation idea they are derived from.
+- **Docs as a published surface**: Markdown content is mirrored into a VitePress site for public reading.
 
-1. 原理最小说明
-2. 带提示练习区
-3. 无提示练习区
-4. 测试区
+## Module Format
+
+Each practice module follows a consistent page order:
+
+1. Minimal concept explanation
+2. Guided exercise
+3. Unguided exercise
+4. Test section
 5. `STOP HERE`
-6. 参考答案与解析
+6. Reference solution and explanation
+7. Engineering notes and interview follow-ups
 
-## 当前状态
+Typical module files:
 
-这是项目骨架。下一步会先确定题源边界、MiniMind 具体仓库版本、以及模块拆解标准，然后再批量生成内容。
+```text
+module_name/
+├── module_name.md
+├── module_name.ipynb
+├── tests.py
+├── solution.md
+└── notes.md
+```
+
+## Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/haibarazz/ml-algo-practice-lab.git
+cd ml-algo-practice-lab
+```
+
+Run one module:
+
+```bash
+cd ml_dl_handwriting/00_math_primitives/softmax_stable
+python3 tests.py
+```
+
+Run all module tests:
+
+```bash
+python3 scripts/test_all_modules.py
+```
+
+Build the documentation site locally:
+
+```bash
+cd docs
+npm install
+npm run docs:build
+```
+
+Start the local docs server:
+
+```bash
+npm run docs:dev
+```
+
+## Repository Structure
+
+```text
+.
+├── ml_dl_handwriting/          # ML/DL handwriting modules
+├── projects/
+│   └── minimind/               # MiniMind open-source project dissection
+├── docs/                       # VitePress documentation site
+├── scripts/                    # docs sync, link check, module test runners
+├── source-research/            # topic/source research notes
+└── templates/                  # module authoring template
+```
+
+## Documentation Workflow
+
+Module Markdown files are maintained in the source directories. The published documentation mirrors them into `docs/`.
+
+```bash
+python3 scripts/sync_docs.py
+python3 scripts/check_docs_links.py
+cd docs && npm run docs:build
+```
+
+The sync step also adds public-reading conveniences:
+
+- Colab and ModelScope entry blocks for modules with notebooks
+- folded reference-answer sections for web readers
+- VitePress-compatible navigation paths
+
+## Verification
+
+Current verification commands:
+
+```bash
+python3 scripts/test_all_modules.py
+python3 scripts/check_docs_links.py
+cd docs && npm run docs:build
+```
+
+Expected baseline:
+
+- 62 module-level tests pass
+- all generated documentation links resolve
+- VitePress build completes
+
+## Contributing
+
+Contributions should keep the module format consistent and runnable. For new modules, start from [templates/handwrite-module](templates/handwrite-module/README.md), add the module to the relevant index, and run the verification commands before opening a pull request.
+
+See [docs/contributing.md](docs/contributing.md) for the detailed workflow.
+
+## License
+
+This project is released under the MIT License. See [LICENSE](LICENSE).

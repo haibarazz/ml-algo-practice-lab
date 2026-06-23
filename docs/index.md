@@ -1,8 +1,10 @@
 # ML Algorithm Practice Lab
 
-这是一个面向机器学习、深度学习手撕题和开源 LLM 项目拆解的个人学习项目。
+![ML Algorithm Practice Lab](/ml-algo-practice-lab-hero.png)
 
-项目参考 Datawhale `llm-algo-leetcode` 的课程站组织方式，但内容目标更偏向个人面试复盘、算法原理复现，以及从真实开源项目中抽取可手写、可测试的练习模块。
+ML Algorithm Practice Lab 是一个开源学习项目，用于把机器学习、深度学习和 LLM 工程中的核心机制拆成可阅读、可手写、可运行、可复盘的练习模块。
+
+项目参考 Datawhale `llm-algo-leetcode` 的课程站组织方式，并扩展出两条更明确的能力主线：无提示独立手撕能力，以及从真实开源 LLM 项目中抽取可练习模块的能力。
 
 ## 学习主线
 
