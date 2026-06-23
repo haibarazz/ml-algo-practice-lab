@@ -1,0 +1,15 @@
+:root {
+  --vp-sidebar-width: 304px;
+}
+
+.vp-doc table {
+  display: table;
+  width: 100%;
+}
+
+.vp-doc .cloud-run {
+  border-left: 4px solid var(--vp-c-brand-1);
+  padding: 12px 16px;
+  margin: 20px 0;
+  background: var(--vp-c-bg-soft);
+}

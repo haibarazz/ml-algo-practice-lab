@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "docs:sync": "python3 ../scripts/sync_docs.py",
+    "docs:dev": "npm run docs:sync && vitepress dev . --host 0.0.0.0",
+    "docs:build": "npm run docs:sync && vitepress build .",
+    "docs:preview": "vitepress preview . --host 0.0.0.0",
+    "check:links": "npm run docs:sync && python3 ../scripts/check_docs_links.py"
+  },
+  "dependencies": {
+    "@giscus/vue": "^3.1.1"
+  },
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
+    "vitepress": "^1.6.4"
+  }
+}

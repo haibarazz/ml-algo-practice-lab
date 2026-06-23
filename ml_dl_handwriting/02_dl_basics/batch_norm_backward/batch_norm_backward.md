@@ -1,0 +1,110 @@
+# BatchNorm Backward
+
+> Status: complete
+
+## 题源线索
+
+- Topic: BatchNorm backward。
+- Source index: `source-research/niuke-ml-dl-topic-index.md`
+
+## 手写实现约束
+
+允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
+
+## 原理最小说明
+
+BatchNorm backward 可以用紧凑公式：
+
+$$dx=\frac{1}{N}\gamma(\sigma^2+\epsilon)^{-1/2}(N dout - \sum dout - \hat x\sum(dout\hat x))$$
+
+其中求和沿 batch 维。
+
+## 带提示练习区
+
+先按 TODO 补全下面的函数。这个版本保留实现台阶。
+
+```python
+import numpy as np
+
+def batch_norm_backward(dout, cache):
+    """TODO guided implementation."""
+    # TODO 1: prepare inputs and check shapes
+    # TODO 2: implement the core formula
+    # TODO 3: handle edge cases and return result
+    raise NotImplementedError
+```
+
+## 无提示练习区
+
+撤掉提示后，独立实现同一个功能。
+
+```python
+import numpy as np
+
+def batch_norm_backward(dout, cache):
+    """TODO blank implementation."""
+    raise NotImplementedError
+```
+
+## 测试区
+
+运行：
+
+```bash
+python tests.py
+```
+
+Notebook 中可以在实现无提示函数后直接运行测试区代码。
+
+```python
+def test_batch_norm_backward():
+    X = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    gamma = np.array([1.0, 1.5])
+    beta = np.zeros(2)
+    mean = X.mean(axis=0); var = X.var(axis=0); eps = 1e-5
+    xhat = (X - mean) / np.sqrt(var + eps)
+    cache = {"xhat": xhat, "gamma": gamma, "var": var, "eps": eps}
+    dout = np.ones_like(X)
+    dx, dgamma, dbeta = batch_norm_backward(dout, cache)
+    assert dx.shape == X.shape
+    assert np.allclose(dgamma, np.sum(xhat, axis=0))
+    assert np.allclose(dbeta, np.array([3.0, 3.0]))
+    assert np.allclose(dx.sum(axis=0), np.zeros(2), atol=1e-8)
+
+test_batch_norm_backward()
+print("All tests passed.")
+```
+
+## STOP HERE
+
+请先完成带提示练习区和无提示练习区，再查看参考答案。
+
+## 参考答案与解析
+
+```python
+import numpy as np
+
+def batch_norm_backward(dout, cache):
+    dout = np.asarray(dout, dtype=np.float64)
+    xhat = cache["xhat"]
+    gamma = cache["gamma"]
+    var = cache["var"]
+    eps = cache["eps"]
+    N = dout.shape[0]
+    dbeta = dout.sum(axis=0)
+    dgamma = np.sum(dout * xhat, axis=0)
+    dxhat = dout * gamma
+    dx = (1.0 / N) / np.sqrt(var + eps) * (N * dxhat - dxhat.sum(axis=0) - xhat * np.sum(dxhat * xhat, axis=0))
+    return dx, dgamma, dbeta
+```
+
+### 解析
+
+1. `dbeta` 是 dout 沿 batch 求和。
+2. `dgamma` 是 `dout * xhat` 沿 batch 求和。
+3. `dx` 使用紧凑公式，shape 和 X 一致。
+4. 这个测试验证 shape 和关键守恒性质。
+
+## 工程要点 / 面试追问
+
+见 `notes.md`。

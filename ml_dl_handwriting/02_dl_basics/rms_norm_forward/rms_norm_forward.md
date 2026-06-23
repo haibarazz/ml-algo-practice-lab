@@ -1,0 +1,92 @@
+# RMSNorm Forward
+
+> Status: complete
+
+## 题源线索
+
+- Topic: RMSNorm forward。
+- Source index: `source-research/niuke-ml-dl-topic-index.md`
+
+## 手写实现约束
+
+允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
+
+## 原理最小说明
+
+RMSNorm 不减均值，只按均方根归一化：
+
+$$y=x/\sqrt{mean(x^2)+\epsilon}\cdot \gamma$$
+
+它比 LayerNorm 少了中心化步骤。
+
+## 带提示练习区
+
+先按 TODO 补全下面的函数。这个版本保留实现台阶。
+
+```python
+import numpy as np
+
+def rms_norm_forward(X, gamma, eps=1e-6):
+    """TODO guided implementation."""
+    # TODO 1: prepare inputs and check shapes
+    # TODO 2: implement the core formula
+    # TODO 3: handle edge cases and return result
+    raise NotImplementedError
+```
+
+## 无提示练习区
+
+撤掉提示后，独立实现同一个功能。
+
+```python
+import numpy as np
+
+def rms_norm_forward(X, gamma, eps=1e-6):
+    """TODO blank implementation."""
+    raise NotImplementedError
+```
+
+## 测试区
+
+运行：
+
+```bash
+python tests.py
+```
+
+Notebook 中可以在实现无提示函数后直接运行测试区代码。
+
+```python
+def test_rms_norm_forward():
+    X = np.array([[3.0, 4.0], [1.0, 1.0]])
+    out = rms_norm_forward(X, np.ones(2), eps=0.0)
+    assert np.allclose(np.sqrt(np.mean(out * out, axis=1)), np.ones(2))
+
+test_rms_norm_forward()
+print("All tests passed.")
+```
+
+## STOP HERE
+
+请先完成带提示练习区和无提示练习区，再查看参考答案。
+
+## 参考答案与解析
+
+```python
+import numpy as np
+
+def rms_norm_forward(X, gamma, eps=1e-6):
+    X = np.asarray(X, dtype=np.float64)
+    rms = np.sqrt(np.mean(X * X, axis=-1, keepdims=True) + eps)
+    return X / rms * gamma
+```
+
+### 解析
+
+1. RMS 是平方均值再开方。
+2. 不减均值，因此输出均值不一定为 0。
+3. LLaMA 等模型常用 RMSNorm 变体。
+
+## 工程要点 / 面试追问
+
+见 `notes.md`。

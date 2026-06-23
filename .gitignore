@@ -1,0 +1,12 @@
+projects/minimind/source/
+node_modules/
+docs/node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+.DS_Store
+**/.DS_Store
