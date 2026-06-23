@@ -24,6 +24,21 @@
 
 GitHub Pages workflow 位于 `.github/workflows/deploy.yml`。推送到 `main` 后，GitHub Actions 会安装依赖、同步文档、构建 VitePress，并部署到 Pages。
 
+首次启用仓库 Pages 时，需要在 GitHub 仓库页面设置一次发布源：
+
+```text
+Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
+```
+
+如果 Actions 在 `actions/configure-pages` 步骤报错：
+
+```text
+HttpError: Not Found
+Get Pages site failed. Please verify that the repository has Pages enabled and configured to build using GitHub Actions
+```
+
+通常不是 VitePress 构建失败，而是仓库还没有启用 Pages，或 Pages Source 还没有设为 `GitHub Actions`。完成上面的设置后，重新运行 workflow 即可。
+
 项目站点默认 base 为：
 
 ```text
