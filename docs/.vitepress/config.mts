@@ -96,9 +96,7 @@ const sidebar: SidebarItem[] = [
     text: '介绍',
     items: [
       { text: '项目概览', link: '/' },
-      { text: '使用指南', link: '/guide' },
-      { text: '贡献指南', link: '/contributing' },
-      { text: '维护手册', link: '/maintenance' }
+      { text: '使用指南', link: '/guide' }
     ]
   },
   {
@@ -129,7 +127,7 @@ export default defineConfig({
   title: 'ML Algorithm Practice Lab',
   description: '面向手撕算法、深度学习训练机制和开源 LLM 项目拆解的学习站点',
   base,
-  cleanUrls: true,
+  cleanUrls: false,
   ignoreDeadLinks: true,
   markdown: {
     math: true

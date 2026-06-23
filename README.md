@@ -20,8 +20,6 @@
   <a href="ml_dl_handwriting/MODULE_INDEX.md">手撕模块索引</a>
   ·
   <a href="projects/minimind/MODULE_INDEX.md">MiniMind 拆解</a>
-  ·
-  <a href="docs/contributing.md">贡献指南</a>
 </p>
 
 <p align="center">
@@ -166,7 +164,7 @@ cd docs && npm run docs:build
 
 新增模块时建议从 [templates/handwrite-module](templates/handwrite-module/README.md) 开始，补充模块题面、Notebook、测试、答案和笔记，并把入口加入对应索引。
 
-提交前请运行验证命令。更完整的流程见 [贡献指南](docs/contributing.md)。
+提交前请运行验证命令，保证模块测试、文档链接检查和站点构建通过。
 
 ## 开源协议
 

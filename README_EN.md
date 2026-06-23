@@ -20,8 +20,6 @@
   <a href="ml_dl_handwriting/MODULE_INDEX.md">Module Index</a>
   ·
   <a href="projects/minimind/MODULE_INDEX.md">MiniMind Track</a>
-  ·
-  <a href="docs/contributing.md">Contributing</a>
 </p>
 
 <p align="center">
@@ -166,7 +164,7 @@ Expected baseline:
 
 Contributions should keep the module format consistent and runnable. For new modules, start from [templates/handwrite-module](templates/handwrite-module/README.md), add the module to the relevant index, and run the verification commands before opening a pull request.
 
-See [docs/contributing.md](docs/contributing.md) for the detailed workflow.
+Before submitting changes, make sure the module tests, documentation link check, and site build all pass.
 
 ## License
 

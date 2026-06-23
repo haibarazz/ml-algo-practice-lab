@@ -33,4 +33,4 @@ ML Algorithm Practice Lab 是一个开源学习项目，用于把机器学习、
 python3 tests.py
 ```
 
-更完整的环境、测试和发布说明见 [使用指南](./guide.md) 与 [维护手册](./maintenance.md)。
+更完整的环境、测试和本地文档构建说明见 [使用指南](./guide.md)。
