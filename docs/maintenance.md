@@ -47,15 +47,6 @@ Get Pages site failed. Please verify that the repository has Pages enabled and c
 
 如果以后改仓库名，需要同步修改 `docs/.vitepress/config.mts` 中的默认 `base`。
 
-## Giscus 评论
+## 评论区
 
-站点主题已经接入 Giscus 的可选挂载逻辑。真正启用前，需要在 GitHub 仓库开启 Discussions，并在构建环境提供：
-
-```text
-VITE_GISCUS_REPO
-VITE_GISCUS_REPO_ID
-VITE_GISCUS_CATEGORY
-VITE_GISCUS_CATEGORY_ID
-```
-
-未配置这些变量时，页面不会渲染评论区。
+站点预留了页面评论区能力。启用前需要先确认仓库 Discussions 的分类和公开互动方式，避免评论入口过早暴露在未准备好的页面上。
