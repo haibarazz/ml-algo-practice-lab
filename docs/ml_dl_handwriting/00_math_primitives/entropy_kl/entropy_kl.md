@@ -10,11 +10,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: 实现熵和 KL 散度。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
@@ -116,4 +111,21 @@ def entropy_kl(p, q=None, eps=1e-12):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- $H(p)=-\sum_i p_i\log p_i$。
+- $D_{KL}(p\Vert q)=\sum_i p_i\log\frac{p_i}{q_i}$，且 $H(p,q)=H(p)+D_{KL}(p\Vert q)$。
+
+### 易错点
+
+- 把 KL 当成距离使用，但 KL 不满足对称性，也不满足三角不等式。
+- 忘记归一化概率，导致熵和 KL 没有概率意义。
+- `0 log 0` 的极限是 0，但直接计算会得到 `nan`。
+- KL 的方向很重要，`KL(p||q)` 和 `KL(q||p)` 对模式覆盖的偏好不同。
+
+### 面试追问
+
+- 交叉熵、熵和 KL 散度之间是什么关系？
+- 为什么知识蒸馏和策略约束里经常出现 KL？
+- KL 为什么非负？什么时候等于 0？
+- 正向 KL 和反向 KL 在分布拟合上的直觉差异是什么？

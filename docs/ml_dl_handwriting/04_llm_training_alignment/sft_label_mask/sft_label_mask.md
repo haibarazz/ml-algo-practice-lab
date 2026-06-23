@@ -10,11 +10,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: SFT label mask。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 list / NumPy；不调用数据处理框架。
@@ -102,4 +97,21 @@ def sft_label_mask(input_ids, prompt_lengths, pad_token_id=0, ignore_index=-100)
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- $L=-\frac{1}{|\mathcal{A}|}\sum_{t\in\mathcal{A}}\log p_\theta(y_t|y_{<t},prompt)$。
+- prompt/pad 位置 label 通常设为 `ignore_index`，只让 answer token 贡献 loss。
+
+### 易错点
+
+- 把 prompt 也计入 loss，模型会被训练去复述用户输入。
+- pad 没 mask，batch padding 会污染 loss。
+- `prompt_lengths` 和 batch 样本对不齐。
+- 多轮对话中 assistant/user/system 边界没有明确标注。
+
+### 面试追问
+
+- SFT 为什么通常只训练 answer token？
+- 多轮对话中 label mask 应如何设计？
+- 如果把 prompt token 也计入 loss，会带来什么问题？
+- 不同 chat template 会怎样影响 mask 边界？

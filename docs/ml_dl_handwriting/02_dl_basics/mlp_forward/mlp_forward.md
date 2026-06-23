@@ -10,11 +10,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: MLP 前向传播。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
@@ -111,4 +106,21 @@ def mlp_forward(X, W1, b1, W2, b2):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- 两层 MLP：$h=\phi(XW_1+b_1)$，$\hat y=hW_2+b_2$。
+- 如果 $\phi$ 是 ReLU，则 $\phi(z)=\max(0,z)$。
+
+### 易错点
+
+- bias 广播维度不清楚，导致单样本和 batch 输入表现不一致。
+- 把 ReLU 放在第二层之后会改变题目定义。
+- 不缓存中间值，后续 backward 难写。
+- 多层线性层如果不加激活，本质仍等价于一个线性层。
+
+### 面试追问
+
+- 为什么 MLP 需要非线性激活函数？
+- 多层线性层不加激活等价于什么？
+- 隐藏层宽度会怎样影响表达能力和过拟合风险？
+- forward 中需要缓存哪些变量给 backward 使用？

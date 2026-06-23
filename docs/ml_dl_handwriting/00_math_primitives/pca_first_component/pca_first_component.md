@@ -10,11 +10,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: 手写 PCA 第一主成分。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
@@ -113,4 +108,21 @@ def pca_first_component(X):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- 中心化后协方差矩阵 $C=\frac{1}{n}X_c^\top X_c$。
+- 第一主成分 $v_1=\arg\max_{\lVert v\rVert=1} v^\top C v$，对应最大特征值的特征向量。
+
+### 易错点
+
+- 忘记中心化，第一主成分会被均值偏移污染。
+- 直接用 `eig` 可能出现很小的复数数值噪声，对称矩阵优先用 `eigh` 或 SVD。
+- 特征向量正负号不唯一，测试时应比较方向等价而不是固定符号。
+- 不同特征量纲差异大时，是否标准化会显著影响 PCA。
+
+### 面试追问
+
+- 为什么第一主成分对应协方差矩阵最大特征值？
+- PCA 和 SVD 的关系是什么？
+- PCA 是有监督还是无监督方法？它会不会利用标签？
+- PCA 降维后保留多少维通常怎么选？

@@ -2,11 +2,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: ID3 信息增益选特征。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 list / dict / math；不允许调用 sklearn.tree。
@@ -109,4 +104,21 @@ def decision_tree_id3(X, y):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- $H(D)=-\sum_c p_c\log p_c$。
+- $Gain(D,A)=H(D)-\sum_v\frac{|D_v|}{|D|}H(D_v)$。
+
+### 易错点
+
+- 条件熵忘记按子集样本占比加权。
+- log 底数不影响特征排序，但会影响信息增益数值。
+- 连续特征需要额外找切分点，本模块只处理离散特征。
+- ID3 偏好多取值特征，工程中常用增益率或正则化限制。
+
+### 面试追问
+
+- ID3、C4.5、CART 的划分准则有什么区别？
+- 信息增益为什么偏好多取值特征？
+- 决策树如何防止过拟合？预剪枝和后剪枝有什么区别？
+- Gini impurity 和 entropy 的直觉差异是什么？

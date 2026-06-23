@@ -10,11 +10,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: RMSNorm forward。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
@@ -102,4 +97,21 @@ def rms_norm_forward(X, gamma, eps=1e-6):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- $RMS(x)=\sqrt{\frac{1}{d}\sum_j x_j^2+\epsilon}$。
+- $y=\gamma\frac{x}{RMS(x)}$；RMSNorm 去掉了 LayerNorm 的减均值步骤。
+
+### 易错点
+
+- 写成 LayerNorm，额外减了均值。
+- 沿 batch 维求 RMS，而不是沿最后的 feature 维。
+- 忘记 gamma 或 gamma shape 不能广播。
+- RMSNorm 只保留 re-scaling，不提供 re-centering invariance。
+
+### 面试追问
+
+- RMSNorm 相比 LayerNorm 省掉了什么计算？
+- 为什么很多 LLM 使用 RMSNorm？
+- RMSNorm 保留了什么不变性，又失去了什么不变性？
+- RMSNorm 的 eps 应该放在哪里？

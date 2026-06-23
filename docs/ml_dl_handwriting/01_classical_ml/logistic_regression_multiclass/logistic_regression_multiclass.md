@@ -10,11 +10,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: 多分类 softmax regression。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
@@ -122,4 +117,21 @@ def logistic_regression_multiclass(X, y, num_classes, lr=0.1, steps=100):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- $p_c=\frac{e^{z_c}}{\sum_j e^{z_j}}$，$z=XW+b$。
+- $L=-\log p_{y}$，对 logits 的梯度为 $p-\operatorname{onehot}(y)$。
+
+### 易错点
+
+- 忘记稳定 softmax，logits 较大时容易 overflow。
+- `grad = probs` 后原地修改，后续再用 `probs` 会被污染。
+- W shape 写成 `[C,D]` 或 `[D,C]` 时要全程保持一致。
+- one-vs-rest 和 multinomial softmax 的训练目标不同，不要混用结论。
+
+### 面试追问
+
+- softmax regression 和 one-vs-rest logistic regression 有什么区别？
+- cross entropy 梯度为什么能化简为 `probs - onehot`？
+- 多分类类别不均衡时可以怎样加权？
+- softmax 输出概率是否一定校准？如果不校准怎么办？

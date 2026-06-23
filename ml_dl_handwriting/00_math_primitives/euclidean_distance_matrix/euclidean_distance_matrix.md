@@ -2,11 +2,6 @@
 
 > Status: complete
 
-## 题源线索
-
-- Topic: 两组向量之间的两两欧氏距离矩阵。
-- Source index: `source-research/niuke-ml-dl-topic-index.md`
-
 ## 手写实现约束
 
 允许使用 Python 基础语法和 NumPy；不允许调用 sklearn、torch 或现成算法实现。
@@ -94,4 +89,21 @@ def euclidean_distance_matrix(X, Y):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 核心公式
+
+- $D_{ij}=\lVert x_i-y_j\rVert_2$；实现时常先算平方距离：$\lVert x_i\rVert^2+\lVert y_j\rVert^2-2x_i^\top y_j$。
+- 如果只比较最近邻，平方距离和真实距离排序一致，可以省掉 $\sqrt{\cdot}$。
+
+### 易错点
+
+- 把输出 shape 写反；给定 X shape 为 `[m,d]`、Y shape 为 `[n,d]` 时，结果应为 `[m,n]`。
+- 显式构造 `[m,n,d]` 中间张量会占用大量内存，大数据时优先使用矩阵乘法展开式。
+- 浮点误差可能让平方距离出现极小负数，开方前可做 `clip(min=0)`。
+- 特征尺度差异会直接影响欧氏距离，KNN/KMeans 前通常要考虑标准化。
+
+### 面试追问
+
+- 如何用矩阵乘法实现两两欧氏距离？时间复杂度和内存复杂度分别是多少？
+- 为什么最近邻检索时常比较平方距离而不是距离本身？
+- 余弦相似度和欧氏距离分别适合什么特征表示？
+- 如果样本量很大，如何分块计算距离矩阵以避免内存爆掉？

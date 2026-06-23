@@ -96,8 +96,64 @@ def fold_answer_section(text: str) -> str:
     return "\n".join(output) + ("\n" if text.endswith("\n") else "")
 
 
+def remove_source_clues(text: str) -> str:
+    lines = text.splitlines()
+    output: list[str] = []
+    skip = False
+
+    for line in lines:
+        if line.startswith("## 题源线索"):
+            skip = True
+            continue
+        if skip and line.startswith("## "):
+            skip = False
+            while output and output[-1] == "":
+                output.pop()
+            output.append("")
+        if not skip:
+            output.append(line)
+
+    return "\n".join(output).strip() + "\n"
+
+
+def notes_body(notes_path: Path) -> str | None:
+    if not notes_path.exists():
+        return None
+
+    lines = notes_path.read_text(encoding="utf-8").splitlines()
+    if lines and lines[0].startswith("# "):
+        lines = lines[1:]
+    while lines and lines[0] == "":
+        lines = lines[1:]
+
+    demoted: list[str] = []
+    for line in lines:
+        if line.startswith("## "):
+            demoted.append("#" + line)
+        else:
+            demoted.append(line)
+
+    body = "\n".join(demoted).strip()
+    return body if body else None
+
+
+def inline_notes_reference(text: str, source_path: Path) -> str:
+    heading = "## 工程要点 / 面试追问"
+    if heading not in text or "见 `notes.md`" not in text:
+        return text
+
+    body = notes_body(source_path.parent / "notes.md")
+    if body is None:
+        return text
+
+    before = text.split(heading, 1)[0].rstrip()
+    return f"{before}\n\n{heading}\n\n{body}\n"
+
+
 def transform_markdown(path: Path) -> str:
     text = path.read_text(encoding="utf-8")
+    text = remove_source_clues(text)
+    text = inline_notes_reference(text, path)
     text = inject_cloud_block(text, notebook_for_markdown(path))
     text = fold_answer_section(text)
     return text
