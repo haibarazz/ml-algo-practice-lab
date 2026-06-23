@@ -2,20 +2,15 @@
 
 这个文件夹用于沉淀机器学习、深度学习和 LLM 训练相关的手撕模块。
 
-## 初始范围
+## 模块范围
 
-第一阶段只做：
+本目录覆盖以下方向：
 
 - Math / Primitive
 - Classical ML
 - Deep Learning Basics
 - Attention / Transformer
 - LLM Training / Alignment
-
-第一阶段暂不做：
-
-- CV / Detection
-- Recommendation
 
 ### Machine Learning
 
