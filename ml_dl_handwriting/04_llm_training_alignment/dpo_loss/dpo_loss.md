@@ -104,7 +104,26 @@ def dpo_loss(policy_chosen, policy_rejected, ref_chosen, ref_rejected, beta=0.1)
 
 ### 面试追问
 
-- DPO 和 PPO/RLHF 的主要区别是什么？
-- DPO 里 reference model 起什么作用？
-- beta 变大或变小会怎样影响训练？
-- DPO 为什么可以看作不显式训练 reward model 的偏好优化？
+::: details 参考回答：DPO 和 PPO/RLHF 的主要区别是什么？
+
+PPO/RLHF 通常先训练 reward model，再用强化学习优化策略，并需要采样和 KL 约束。DPO 直接用偏好对构造分类式目标优化语言模型，流程更简单，不显式训练 reward model。
+
+:::
+
+::: details 参考回答：DPO 里 reference model 起什么作用？
+
+reference model 提供一个基准偏好 margin，约束当前模型不要为了迎合偏好数据而偏离原模型太多。它相当于隐式 KL 约束的一部分，帮助保留原有语言能力和稳定训练。
+
+:::
+
+::: details 参考回答：beta 变大或变小会怎样影响训练？
+
+beta 控制偏好 margin 的放大程度，也影响相对 reference 的约束强度。beta 太大时更新更激进，可能过拟合偏好；太小时信号变弱，模型变化不明显。
+
+:::
+
+::: details 参考回答：DPO 为什么可以看作不显式训练 reward model 的偏好优化？
+
+DPO 从 RLHF 的最优策略形式出发，把 reward 差转化为策略和 reference 的 logprob 差。这样可以直接用 chosen/rejected 偏好优化模型，而不需要单独拟合一个显式 reward 函数。
+
+:::

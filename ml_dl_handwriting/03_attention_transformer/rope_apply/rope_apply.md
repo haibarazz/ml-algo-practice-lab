@@ -113,7 +113,26 @@ def rope_apply(x, base=10000):
 
 ### 面试追问
 
-- RoPE 为什么能表达相对位置信息？
-- RoPE 和绝对位置编码有什么区别？
-- RoPE 在 KV cache 推理时 position offset 如何处理？
-- RoPE 和 ALiBi 的设计直觉有什么不同？
+::: details 参考回答：RoPE 为什么能表达相对位置信息？
+
+RoPE 对 Q/K 的成对维度按位置角度旋转，两个位置的内积会自然包含相对位置差。也就是说，attention score 不只看内容相似度，还能感知 query 和 key 的位置间隔。
+
+:::
+
+::: details 参考回答：RoPE 和绝对位置编码有什么区别？
+
+绝对位置编码通常是把位置向量加到 token embedding 上，位置信息混在输入表示里。RoPE 不直接加向量，而是在注意力计算前旋转 Q/K，使相对位置信息进入点积。
+
+:::
+
+::: details 参考回答：RoPE 在 KV cache 推理时 position offset 如何处理？
+
+KV cache 推理时，新 token 的 position 不能从 0 重新开始，而要接在已缓存长度之后。否则新 Q 和旧 K 使用的位置坐标不一致，attention 的相对位置会错乱。
+
+:::
+
+::: details 参考回答：RoPE 和 ALiBi 的设计直觉有什么不同？
+
+RoPE 用旋转让点积编码相对位置，属于乘性或几何式位置注入。ALiBi 直接按距离给 attention logits 加负偏置，鼓励近处更高权重，结构更简单且外推直觉更直接。
+
+:::

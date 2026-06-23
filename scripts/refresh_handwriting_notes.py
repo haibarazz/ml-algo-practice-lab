@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from handwriting_interview_answers import MODULE_ANSWERS
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -830,10 +832,27 @@ MODULE_NOTES: dict[str, dict[str, list[str] | str]] = {
 }
 
 
-def notes_body(data: dict[str, list[str] | str]) -> str:
+def interview_questions_body(rel: str, data: dict[str, list[str] | str]) -> str:
+    questions = data["questions"]
+    answers = MODULE_ANSWERS.get(rel)
+    if answers is None:
+        raise KeyError(f"Missing interview answers for {rel}")
+    if len(answers) != len(questions):
+        raise ValueError(
+            f"Interview answer count mismatch for {rel}: "
+            f"{len(answers)} answers for {len(questions)} questions"
+        )
+
+    blocks = []
+    for question, answer in zip(questions, answers):
+        blocks.append(f"::: details 参考回答：{question}\n\n{answer}\n\n:::")
+    return "\n\n".join(blocks)
+
+
+def notes_body(rel: str, data: dict[str, list[str] | str]) -> str:
     formula = "\n".join(f"- {item}" for item in data["formula"])
     pitfalls = "\n".join(f"- {item}" for item in data["pitfalls"])
-    questions = "\n".join(f"- {item}" for item in data["questions"])
+    questions = interview_questions_body(rel, data)
     return f"""## 核心公式
 
 {formula}
@@ -848,12 +867,12 @@ def notes_body(data: dict[str, list[str] | str]) -> str:
 """
 
 
-def notes_text(data: dict[str, list[str] | str]) -> str:
-    return f"# {data['title']}\n\n{notes_body(data)}"
+def notes_text(rel: str, data: dict[str, list[str] | str]) -> str:
+    return f"# {data['title']}\n\n{notes_body(rel, data)}"
 
 
-def inline_section(data: dict[str, list[str] | str]) -> str:
-    body = notes_body(data).replace("## 核心公式", "### 核心公式")
+def inline_section(rel: str, data: dict[str, list[str] | str]) -> str:
+    body = notes_body(rel, data).replace("## 核心公式", "### 核心公式")
     body = body.replace("## 易错点", "### 易错点")
     body = body.replace("## 面试追问", "### 面试追问")
     return body.strip() + "\n"
@@ -894,11 +913,11 @@ def main() -> int:
         notes_path = module_dir / "notes.md"
         page_path = module_dir / f"{name}.md"
 
-        notes_path.write_text(notes_text(data), encoding="utf-8")
+        notes_path.write_text(notes_text(rel, data), encoding="utf-8")
 
         page_text = page_path.read_text(encoding="utf-8")
         page_text = remove_source_clues(page_text)
-        page_text = replace_learning_notes_section(page_text, inline_section(data))
+        page_text = replace_learning_notes_section(page_text, inline_section(rel, data))
         page_path.write_text(page_text, encoding="utf-8")
 
     print(f"Updated {len(MODULE_NOTES)} handwriting modules.")

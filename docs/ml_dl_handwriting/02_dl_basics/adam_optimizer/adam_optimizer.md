@@ -123,7 +123,26 @@ def adam_optimizer(param, grad, m, v, t, lr=1e-3, beta1=0.9, beta2=0.999, eps=1e
 
 ### 面试追问
 
-- Adam 和 SGD momentum 的区别是什么？
-- bias correction 为什么必要？
-- AdamW 为什么把 weight decay 解耦？
-- Adam 在稀疏梯度、噪声梯度场景下有什么优势和风险？
+::: details 参考回答：Adam 和 SGD momentum 的区别是什么？
+
+SGD momentum 维护梯度的一阶动量，用历史方向平滑更新。Adam 同时维护一阶动量和二阶平方梯度，用二阶估计为每个参数自适应调整步长。
+
+:::
+
+::: details 参考回答：bias correction 为什么必要？
+
+训练初期 `m` 和 `v` 从 0 初始化，会系统性偏小。bias correction 用 `1 - beta^t` 修正这个偏差，否则前几步的有效更新尺度会不符合预期。
+
+:::
+
+::: details 参考回答：AdamW 为什么把 weight decay 解耦？
+
+传统 L2 正则把权重项加到梯度里，会被 Adam 的自适应二阶缩放影响，不再等价于简单权重衰减。AdamW 直接在参数更新中衰减权重，使正则强度更可控。
+
+:::
+
+::: details 参考回答：Adam 在稀疏梯度、噪声梯度场景下有什么优势和风险？
+
+Adam 对稀疏梯度和噪声梯度友好，因为每个参数有自适应学习率，少更新参数也能获得较大有效步长。风险是有时泛化不如 SGD，学习率、weight decay 和 beta 设置不当也会导致训练后期不稳。
+
+:::
