@@ -44,6 +44,11 @@ jobs:
 
       - name: Build with VitePress
         working-directory: ./docs
+        env:
+          VITE_GISCUS_REPO: ${{ vars.VITE_GISCUS_REPO }}
+          VITE_GISCUS_REPO_ID: ${{ vars.VITE_GISCUS_REPO_ID }}
+          VITE_GISCUS_CATEGORY: ${{ vars.VITE_GISCUS_CATEGORY }}
+          VITE_GISCUS_CATEGORY_ID: ${{ vars.VITE_GISCUS_CATEGORY_ID }}
         run: npm run docs:build
 
       - name: Upload artifact

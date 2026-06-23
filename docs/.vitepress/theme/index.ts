@@ -26,7 +26,7 @@ export default {
               repoId: giscusConfig.repoId,
               category: giscusConfig.category,
               categoryId: giscusConfig.categoryId,
-              mapping: 'title',
+              mapping: 'pathname',
               strict: '0',
               reactionsEnabled: '1',
               emitMetadata: '0',
