@@ -1,4 +1,4 @@
-# Repeat KV for GQA
+# GQA/MQA：重复 KV head 以服务更多 Q head
 
 ::: tip 云端运行环境
 
@@ -8,20 +8,35 @@
 :::
 
 
-> Status: complete
+拆解 MiniMind 的 `repeat_kv` 和 attention 中 `num_key_value_heads` 的显存/带宽意义。
 
-## Source Mapping
+## 学习目标
+
+- 区分 MHA、MQA、GQA 的 head 数关系。
+- 理解为什么 KV cache 大小由 KV head 数决定。
+- 掌握 `repeat_kv` 在 head 维重复而不是 seq 维重复。
+
+## MiniMind 源码定位
 
 - `model/model_minimind.py:86-89`
 - `model/model_minimind.py:91-134`
 
-## 手写实现约束
+## 源码机制详解
 
-允许 NumPy；输入 shape 为 `[B, S, H_kv, D]`。
+MiniMind 配置里 `num_attention_heads` 默认是 8，`num_key_value_heads` 默认是 4，因此每两个 Q head 共享一组 K/V。这就是 GQA：Query head 多，Key/Value head 少。
+`repeat_kv` 接收 `[batch, seq, kv_heads, head_dim]`，先插入一个 repeat 维，再 expand 到 `n_rep`，最后 reshape 成 `[batch, seq, q_heads, head_dim]`。它是在注意力计算前把共享 K/V 展开成与 Q head 数一致的形状。
+推理时 KV cache 保存每层每个历史 token 的 K/V。减少 KV head 数会近似线性降低 cache 显存和读取带宽，所以 GQA 是大模型推理优化中非常关键的结构折中。
 
-## 原理最小说明
+## 关键公式与数据流
 
-GQA 中 Q head 数量大于 KV head。计算 attention 前，需要把每个 KV head 复制 `n_rep=num_q_heads/num_kv_heads` 次。
+- MHA：$H_q=H_k=H_v$；MQA：$H_k=H_v=1$；GQA：$1 < H_{kv} < H_q$。
+- $n_{rep}=H_q/H_{kv}$。
+- KV cache 规模近似正比于 $layers \times seq \times H_{kv}\times head\_dim$。
+
+## 为什么练这个
+
+- 手写 repeat_kv 能直接理解 GQA 的 shape 变化。
+- 这也是推理显存优化和 KV cache 章节的前置知识。
 
 ## 带提示练习区
 
@@ -32,7 +47,7 @@ import numpy as np
 
 
 def repeat_kv(x, n_rep):
-    """TODO guided implementation."""
+    """带提示实现。"""
     # TODO 1: n_rep 为 1 时直接返回
     # TODO 2: 在 head 维后插入 repeat 维
     # TODO 3: reshape 成重复后的 head 数量
@@ -48,7 +63,7 @@ import numpy as np
 
 
 def repeat_kv(x, n_rep):
-    """TODO blank implementation."""
+    """无提示实现。"""
     raise NotImplementedError
 ```
 
@@ -78,7 +93,7 @@ test_repeat_kv()
 print("All tests passed.")
 ```
 
-## STOP HERE
+## 先停在这里
 
 请先完成带提示练习区和无提示练习区，再查看参考答案。
 
@@ -107,18 +122,28 @@ def repeat_kv(x, n_rep):
 
 ## 工程要点 / 面试追问
 
-### Source Mapping
+### 关键公式与数据流
 
-- `model/model_minimind.py:86-89`
-- `model/model_minimind.py:91-134`
+- MHA：$H_q=H_k=H_v$；MQA：$H_k=H_v=1$；GQA：$1 < H_{kv} < H_q$。
+- $n_{rep}=H_q/H_{kv}$。
+- KV cache 规模近似正比于 $layers \times seq \times H_{kv}\times head\_dim$。
 
-### 常见坑
+### 易错点
 
-- 这里重复的是 KV，不是 Q。
-- 真实 attention 前还会 transpose 到 `[B, H, S, D]`。
+- 在 seq 维 repeat 会复制时间步，语义完全错。
+- `num_attention_heads` 必须能被 `num_key_value_heads` 整除。
+- 只看参数量会低估 GQA 价值，它主要优化推理 cache 和带宽。
 
-### 可继续追问
+### 面试追问
 
-- 这个最小实现和 MiniMind 源码中的真实张量 shape 有什么差别？
-- 如果 batch size、seq len、hidden size 变大，哪里会先成为瓶颈？
-- 这个模块在 Pretrain / SFT / DPO / Inference 哪个阶段最容易出错？
+::: details 参考回答：GQA 相比 MHA 主要省在哪里？
+
+主要省 KV cache 和推理时读取 K/V 的带宽。Q head 仍然多，但 K/V head 更少，历史 token 的缓存规模随 KV head 数下降。
+
+:::
+
+::: details 参考回答：`repeat_kv` 和真的学习更多 KV head 有什么区别？
+
+`repeat_kv` 只是把少量已学习的 K/V 表示广播给多个 Q head，不增加 K/V 参数和 cache。学习更多 KV head 会增加表达多样性，但也增加显存和带宽成本。
+
+:::

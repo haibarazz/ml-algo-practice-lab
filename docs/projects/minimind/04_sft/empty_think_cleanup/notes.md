@@ -1,18 +1,26 @@
-# Empty Think Cleanup Notes
+# 空 thinking 标签清理：控制推理风格和数据分布笔记
 
-## Source Mapping
+## 关键公式与数据流
 
-- `dataset/lm_dataset.py:31-35`
-- `dataset/lm_dataset.py:106-119`
-- `dataset/lm_dataset.py:195-224`
+- 若随机数 $u>empty\_think\_ratio$，将空块 `<think>\\n\\n</think>\\n\\n` 替换为空串。
+- 保留概率约为 $empty\_think\_ratio$，删除概率约为 $1-empty\_think\_ratio$。
 
-## 常见坑
+## 易错点
 
-- 真实代码里 keep/remove 是随机比例控制。
-- 这是数据增强/模板鲁棒性的一部分。
+- 机械删除所有 think 标签会改变模板分布。
+- 只做字符串替换时要保证不会误删非空推理内容。
+- 训练和推理模板不一致，会造成模型输出格式漂移。
 
-## 可继续追问
+## 面试追问
 
-- 这个最小实现和 MiniMind 源码中的真实张量 shape 有什么差别？
-- 如果 batch size、seq len、hidden size 变大，哪里会先成为瓶颈？
-- 这个模块在 Pretrain / SFT / DPO / Inference 哪个阶段最容易出错？
+::: details 参考回答：为什么空 `<think>` 标签也值得单独处理？
+
+它虽然没有语义内容，但会成为模型学习的输出格式。大量空 thinking 块可能让模型习惯输出空思考段，全部删除又可能失去对模板格式的适应。
+
+:::
+
+::: details 参考回答：这个函数和模型能力有什么关系？
+
+它不改变模型结构，却改变训练分布。LLM 的行为很大一部分来自数据模板，格式清理会直接影响回答是否带 thinking、tool call 或角色标记。
+
+:::

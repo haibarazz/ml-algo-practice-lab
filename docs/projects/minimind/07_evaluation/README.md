@@ -1,7 +1,7 @@
 # 评估
 
-这个 section 按 MiniMind 学习路径组织，不按源码目录机械排序。
+把交叉熵、困惑度和评测脚本的输出联系起来，理解语言模型基本评估量。
 
-## Modules
-
-- `perplexity_from_losses`: 从 token 平均交叉熵估计困惑度。
+| 模块 | 学习重点 |
+| --- | --- |
+| [困惑度：从平均交叉熵到 PPL](./perplexity_from_losses/perplexity_from_losses.md) | 把语言模型 loss 转成更直观的 perplexity，并理解它的适用边界。 |

@@ -1,19 +1,33 @@
-# Gradient Accumulation Counter
+# 梯度累积：用小 batch 模拟大 batch
 
-> Status: complete
+拆解 MiniMind 训练循环里 loss 缩放、反向传播和 optimizer step 的计数逻辑。
 
-## Source Mapping
+## 学习目标
+
+- 理解为什么 loss 要除以 accumulation_steps。
+- 掌握每隔 N 个 mini-batch 才执行 optimizer.step 的逻辑。
+- 理解 epoch 末尾剩余 batch 也需要补一次 step。
+
+## MiniMind 源码定位
 
 - `trainer/train_pretrain.py:24-80`
 - `trainer/train_full_sft.py:24-80`
 
-## 手写实现约束
+## 源码机制详解
 
-只用 Python list；不做真实反向传播。
+MiniMind 每个 mini-batch 都 forward/backward，但不是每次都更新参数。它先把 `loss = loss / accumulation_steps`，然后 `backward()` 累积梯度；只有当 `step % accumulation_steps == 0` 时才 unscale、clip、optimizer.step、zero_grad。
+loss 除以 accumulation_steps 是为了让累积 N 次后的梯度均值接近大 batch 一次 backward 的梯度。如果不除，等效学习率会放大 N 倍。
+函数末尾还有一个补偿逻辑：如果最后一个 step 不是 accumulation_steps 的整数倍，说明梯度已经累积但还没更新，需要执行一次 optimizer step。这个细节对小数据集或恢复训练很重要。
 
-## 原理最小说明
+## 关键公式与数据流
 
-梯度累积把 loss 除以 accumulation_steps，每隔若干 step 执行一次 optimizer step。最后不足一个完整累积窗口，也要补一次 step。
+- 等效 batch size：$B_{eff}=B_{micro}\times accumulation\_steps\times world\_size$。
+- 每个 micro-batch 使用 $L/N$ 反传，累积 N 次后得到平均梯度。
+
+## 为什么练这个
+
+- 这个练习把训练循环从“调库”拆成可数的状态机。
+- 它对应真实训练中显存不够但想增大有效 batch 的常见方案。
 
 ## 带提示练习区
 
@@ -21,7 +35,7 @@
 
 ```python
 def accumulation_plan(num_batches, accumulation_steps):
-    """TODO guided implementation."""
+    """带提示实现。"""
     # TODO 1: 遍历 batch step 从 1 开始
     # TODO 2: step 可整除时记录 optimizer step
     # TODO 3: 末尾剩余 batch 时补一次
@@ -34,7 +48,7 @@ def accumulation_plan(num_batches, accumulation_steps):
 
 ```python
 def accumulation_plan(num_batches, accumulation_steps):
-    """TODO blank implementation."""
+    """无提示实现。"""
     raise NotImplementedError
 ```
 
@@ -59,7 +73,7 @@ test_accumulation_plan()
 print("All tests passed.")
 ```
 
-## STOP HERE
+## 先停在这里
 
 请先完成带提示练习区和无提示练习区，再查看参考答案。
 
@@ -83,4 +97,27 @@ def accumulation_plan(num_batches, accumulation_steps):
 
 ## 工程要点 / 面试追问
 
-见 `notes.md`。
+### 关键公式与数据流
+
+- 等效 batch size：$B_{eff}=B_{micro}\times accumulation\_steps\times world\_size$。
+- 每个 micro-batch 使用 $L/N$ 反传，累积 N 次后得到平均梯度。
+
+### 易错点
+
+- 忘记除以 accumulation_steps，会让梯度尺度变大。
+- 忘记处理尾部剩余 batch，会丢掉最后几步梯度。
+- zero_grad 放错位置会清空尚未累积完的梯度。
+
+### 面试追问
+
+::: details 参考回答：梯度累积和直接增大 batch size 完全等价吗？
+
+在没有 BatchNorm、dropout 随机性和分布式同步差异时，梯度均值接近等价。但优化器状态更新频率、随机性和日志 step 语义仍可能不同。
+
+:::
+
+::: details 参考回答：为什么梯度裁剪要放在 unscale 之后？
+
+混合精度下梯度可能被 scaler 放大，直接裁剪会裁到错误尺度。先 unscale 再 clip，裁剪阈值才对应真实梯度范数。
+
+:::

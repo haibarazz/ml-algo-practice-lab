@@ -1,16 +1,26 @@
-# Per Token Log Probs Notes
+# 逐 token logprob：rollout 后如何评估生成概率笔记
 
-## Source Mapping
+## 关键公式与数据流
 
-- `trainer/rollout_engine.py:23-36`
+- $\log p_\theta(y_t|x,y_{<t})=\log softmax(logits_{t-1})[y_t]$。
+- $ratio_t=\exp(\log p_\theta(y_t)-\log p_{old}(y_t))$。
 
-## 常见坑
+## 易错点
 
-- logits 和 token_ids 的 seq_len 必须一致。
-- 真实代码会配合 logits_to_keep 减少计算。
+- `n_keep` 少加 1 会拿不到预测第一个生成 token 的 logits。
+- gather 维度必须是 vocab 维。
+- 生成序列里的 pad token 需要后续 completion_mask 屏蔽。
 
-## 可继续追问
+## 面试追问
 
-- 这个最小实现和 MiniMind 源码中的真实张量 shape 有什么差别？
-- 如果 batch size、seq len、hidden size 变大，哪里会先成为瓶颈？
-- 这个模块在 Pretrain / SFT / DPO / Inference 哪个阶段最容易出错？
+::: details 参考回答：为什么 rollout 后不直接使用 generate 时的概率？
+
+有些推理后端不返回完整概率，或者需要用当前训练图重新计算可对齐的 logprob。重新 forward 可以确保 logprob 与当前 policy、mask 和 dtype 处理一致。
+
+:::
+
+::: details 参考回答：per-token logprob 和序列 logprob 有什么关系？
+
+序列 logprob 通常是有效 token logprob 的和。PPO/GRPO 常保留逐 token 形式，因为 ratio、clip 和 mask 都可能按 token 粒度计算。
+
+:::

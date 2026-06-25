@@ -1,4 +1,4 @@
-# Per Token Log Probs
+# 逐 token logprob：rollout 后如何评估生成概率
 
 ::: tip 云端运行环境
 
@@ -8,19 +8,34 @@
 :::
 
 
-> Status: complete
+复刻 `rollout_engine.compute_per_token_logps`，理解 RL/GRPO/PPO 中生成 token 的概率记录。
 
-## Source Mapping
+## 学习目标
+
+- 理解为什么 rollout 后还要重新计算生成 token 的 logprob。
+- 掌握 `logits_to_keep=n_keep+1` 与 shift 的关系。
+- 理解 per-token logprob 如何服务 PPO/GRPO 的 ratio。
+
+## MiniMind 源码定位
 
 - `trainer/rollout_engine.py:23-36`
+- `trainer/rollout_engine.py:71-92`
 
-## 手写实现约束
+## 源码机制详解
 
-允许 NumPy。
+`compute_per_token_logps` 接收完整 `input_ids`，只保留最后 `n_keep` 个生成 token 的 logprob。它 forward 时传 `logits_to_keep=n_keep+1`，因为要用前一个位置的 logits 预测后一个生成 token。
+函数对 logits 做 log-softmax，再按真实 token id gather 出对应 logprob。返回形状是 `[batch, n_keep]`，每个元素表示模型在当时上下文下给这个生成 token 的 log 概率。
+在 `TorchRolloutEngine.rollout` 中，模型先 generate 出 completion，再用当前 policy 重新算 per-token logprob。后续 PPO/GRPO 会比较 old/new/ref logprob，构造 ratio、KL 或 advantage 加权目标。
 
-## 原理最小说明
+## 关键公式与数据流
 
-RL 阶段需要知道生成 token 在当前策略下的 logprob。MiniMind 只保留最后 n_keep 个 token，并从 log_softmax 后的 vocab 分布里 gather 对应 id。
+- $\log p_\theta(y_t|x,y_{<t})=\log softmax(logits_{t-1})[y_t]$。
+- $ratio_t=\exp(\log p_\theta(y_t)-\log p_{old}(y_t))$。
+
+## 为什么练这个
+
+- 这个练习是 PPO/GRPO 的前置模块：没有 per-token logprob 就没有 ratio。
+- 它也训练你处理 logits 和 token id 的 gather 维度。
 
 ## 带提示练习区
 
@@ -31,7 +46,7 @@ import numpy as np
 
 
 def per_token_logps(logits, token_ids):
-    """TODO guided implementation."""
+    """带提示实现。"""
     # TODO 1: 对 vocab 维做稳定 log_softmax
     # TODO 2: 按 token_ids gather
     # TODO 3: 返回每个位置的 logprob
@@ -47,7 +62,7 @@ import numpy as np
 
 
 def per_token_logps(logits, token_ids):
-    """TODO blank implementation."""
+    """无提示实现。"""
     raise NotImplementedError
 ```
 
@@ -77,7 +92,7 @@ test_per_token_logps()
 print("All tests passed.")
 ```
 
-## STOP HERE
+## 先停在这里
 
 请先完成带提示练习区和无提示练习区，再查看参考答案。
 
@@ -108,17 +123,27 @@ def per_token_logps(logits, token_ids):
 
 ## 工程要点 / 面试追问
 
-### Source Mapping
+### 关键公式与数据流
 
-- `trainer/rollout_engine.py:23-36`
+- $\log p_\theta(y_t|x,y_{<t})=\log softmax(logits_{t-1})[y_t]$。
+- $ratio_t=\exp(\log p_\theta(y_t)-\log p_{old}(y_t))$。
 
-### 常见坑
+### 易错点
 
-- logits 和 token_ids 的 seq_len 必须一致。
-- 真实代码会配合 logits_to_keep 减少计算。
+- `n_keep` 少加 1 会拿不到预测第一个生成 token 的 logits。
+- gather 维度必须是 vocab 维。
+- 生成序列里的 pad token 需要后续 completion_mask 屏蔽。
 
-### 可继续追问
+### 面试追问
 
-- 这个最小实现和 MiniMind 源码中的真实张量 shape 有什么差别？
-- 如果 batch size、seq len、hidden size 变大，哪里会先成为瓶颈？
-- 这个模块在 Pretrain / SFT / DPO / Inference 哪个阶段最容易出错？
+::: details 参考回答：为什么 rollout 后不直接使用 generate 时的概率？
+
+有些推理后端不返回完整概率，或者需要用当前训练图重新计算可对齐的 logprob。重新 forward 可以确保 logprob 与当前 policy、mask 和 dtype 处理一致。
+
+:::
+
+::: details 参考回答：per-token logprob 和序列 logprob 有什么关系？
+
+序列 logprob 通常是有效 token logprob 的和。PPO/GRPO 常保留逐 token 形式，因为 ratio、clip 和 mask 都可能按 token 粒度计算。
+
+:::

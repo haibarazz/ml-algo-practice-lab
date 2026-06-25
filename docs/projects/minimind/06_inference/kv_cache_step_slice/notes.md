@@ -1,18 +1,27 @@
-# KV Cache Step Slice Notes
+# KV cache 增量推理：每步只算新 token笔记
 
-## Source Mapping
+## 关键公式与数据流
 
-- `model/model_minimind.py:257-288`
-- `model/model_minimind.py:120-124`
-- `model/model_minimind.py:209-232`
+- 无 cache 每步复杂度会重复处理整个前缀；有 cache 时每步只投影新 token 的 Q/K/V。
+- $K_{all}=[K_{past};K_{new}],\quad V_{all}=[V_{past};V_{new}]$。
+- $position_{new}$ 从 $past\_len$ 开始，而不是从 0 开始。
 
-## 常见坑
+## 易错点
 
-- KV cache 不是缓存 logits，而是每层 attention 的 K/V。
-- attention_mask 仍要随生成长度增长。
+- 切片错成 `input_ids[:, -1:]` 在某些多 token step 下会漏 token。
+- position offset 从 0 重启会破坏 RoPE 相对位置。
+- attention_mask 也要随新 token 扩展，否则 padding/可见性不一致。
 
-## 可继续追问
+## 面试追问
 
-- 这个最小实现和 MiniMind 源码中的真实张量 shape 有什么差别？
-- 如果 batch size、seq len、hidden size 变大，哪里会先成为瓶颈？
-- 这个模块在 Pretrain / SFT / DPO / Inference 哪个阶段最容易出错？
+::: details 参考回答：KV cache 为什么只缓存 K/V，不缓存 Q？
+
+Q 只属于当前 query 位置，每步新 token 都会产生新的 Q。历史 token 作为可被查询的记忆，需要保存的是它们的 K/V。
+
+:::
+
+::: details 参考回答：KV cache 的主要代价是什么？
+
+代价是显存和带宽。长上下文下每层每个历史 token 都要保存 K/V，推理每步还要读取这些缓存，所以 GQA/MQA 会特别重要。
+
+:::

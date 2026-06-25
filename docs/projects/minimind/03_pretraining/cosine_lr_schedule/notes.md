@@ -1,16 +1,26 @@
-# Cosine LR Schedule Notes
+# 余弦学习率：从初始学习率平滑衰减笔记
 
-## Source Mapping
+## 关键公式与数据流
 
-- `trainer/trainer_utils.py:40-41`
+- $lr_t=lr_0\left(0.1+0.45(1+\cos(\pi t/T))\right)$。
+- $t=0$ 时 $lr_t=lr_0$；$t=T$ 时 $lr_t=0.1lr_0$。
 
-## 常见坑
+## 易错点
 
-- 没有 warmup；这是项目当前实现，不是通用最佳实践。
-- total_steps 不能为 0。
+- current_step 和 total_steps 如果从不同基准计数，会导致衰减过快或过慢。
+- total_steps 为 0 时需要避免除零。
+- 只在 epoch 开头更新 lr，会和源码行为不同。
 
-## 可继续追问
+## 面试追问
 
-- 这个最小实现和 MiniMind 源码中的真实张量 shape 有什么差别？
-- 如果 batch size、seq len、hidden size 变大，哪里会先成为瓶颈？
-- 这个模块在 Pretrain / SFT / DPO / Inference 哪个阶段最容易出错？
+::: details 参考回答：为什么训练中常用余弦学习率衰减？
+
+它前期保持较大学习率以快速下降，后期平滑降低步长以减少震荡。相比阶梯衰减，余弦曲线没有突变，更适合长训练过程。
+
+:::
+
+::: details 参考回答：MiniMind 这个公式最低为什么不是 0？
+
+最低保留 10% 初始学习率可以避免训练后期完全停滞。对小规模训练来说，这是一种简单保守的衰减策略。
+
+:::
